@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Check } from 'lucide-react';
 import { supabase } from "../lib/supabase.js";
 
 export default function TodoMain() {
@@ -7,6 +8,8 @@ export default function TodoMain() {
     const [formularioVisivel, setFormularioVisivel] = useState(false)
     const [tarefas, setTarefas] = useState([])
     const [carregando, setCarregando] = useState(true)
+    const [tarefaSelecionada, setTarefaSelecionada] = useState(null)
+    const [salvando, setSalvando] = useState(false)
 
     const buscarTarefas = async () => {
         const { data, error } = await supabase
@@ -37,6 +40,38 @@ export default function TodoMain() {
         setDescricao('')
         setFormularioVisivel(false)
         buscarTarefas()
+    }
+
+    const abrirConfirmacao = (tarefa) => {
+        setTarefaSelecionada(tarefa)
+    }
+
+    const fecharConfirmacao = () => {
+        if (salvando) return
+        setTarefaSelecionada(null)
+    }
+
+    const confirmarAlteracao = async () => {
+        if (!tarefaSelecionada) return
+        setSalvando(true)
+
+        const novoStatus = !tarefaSelecionada.tarefa_concluida
+
+        const { error } = await supabase
+            .from('tarefas')
+            .update({ tarefa_concluida: novoStatus })
+            .eq('id', tarefaSelecionada.id)
+
+        setSalvando(false)
+
+        if (error) return alert(error.message)
+
+        setTarefas((anteriores) =>
+            anteriores.map((t) =>
+                t.id === tarefaSelecionada.id ? { ...t, tarefa_concluida: novoStatus } : t
+            )
+        )
+        setTarefaSelecionada(null)
     }
 
     return (
@@ -131,15 +166,30 @@ export default function TodoMain() {
                                     <h3 className="font-serif text-2xl font-bold text-white">
                                         {tarefa.titulo}
                                     </h3>
-                                    <span
-                                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                                            tarefa.tarefa_concluida
-                                                ? 'bg-violet-500/15 text-violet-300'
-                                                : 'bg-zinc-800 text-zinc-400'
-                                        }`}
-                                    >
-                                        {tarefa.tarefa_concluida ? 'Concluída' : 'Pendente'}
-                                    </span>
+
+                                    <div className="flex shrink-0 flex-col items-center gap-2">
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-300 ${
+                                                tarefa.tarefa_concluida
+                                                    ? 'bg-emerald-500/15 text-emerald-400'
+                                                    : 'bg-zinc-800 text-zinc-400'
+                                            }`}
+                                        >
+                                            {tarefa.tarefa_concluida ? 'Concluída' : 'Pendente'}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => abrirConfirmacao(tarefa)}
+                                            aria-label={tarefa.tarefa_concluida ? 'Marcar como pendente' : 'Marcar como concluída'}
+                                            title={tarefa.tarefa_concluida ? 'Marcar como pendente' : 'Marcar como concluída'}
+                                            className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 hover:bg-emerald-500/10 hover:text-emerald-400 ${
+                                                tarefa.tarefa_concluida ? 'text-emerald-400' : 'text-zinc-500'
+                                            }`}
+                                        >
+                                            <Check size={20} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <p className="mt-2 text-zinc-300">{tarefa.descricao}</p>
@@ -152,6 +202,78 @@ export default function TodoMain() {
                     )}
                 </div>
             </div>
+
+            {/* Modal de confirmação */}
+            {tarefaSelecionada && (
+                <div
+                    onClick={fecharConfirmacao}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-violet-950/50"
+                    >
+                        <div
+                            className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
+                                tarefaSelecionada.tarefa_concluida
+                                    ? 'bg-zinc-800 text-zinc-300'
+                                    : 'bg-emerald-500/15 text-emerald-400'
+                            }`}
+                        >
+                            <Check size={24} />
+                        </div>
+
+                        <h2 className="font-serif text-2xl font-bold text-white">
+                            {tarefaSelecionada.tarefa_concluida
+                                ? 'Voltar para pendente?'
+                                : 'Concluir tarefa?'}
+                        </h2>
+
+                        <p className="mt-2 text-zinc-400">
+                            A tarefa <span className="font-semibold text-white">"{tarefaSelecionada.titulo}"</span> será marcada como{' '}
+                            <span
+                                className={
+                                    tarefaSelecionada.tarefa_concluida
+                                        ? 'font-semibold text-zinc-300'
+                                        : 'font-semibold text-emerald-400'
+                                }
+                            >
+                                {tarefaSelecionada.tarefa_concluida ? 'pendente' : 'concluída'}
+                            </span>.
+                        </p>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={fecharConfirmacao}
+                                disabled={salvando}
+                                className="cursor-pointer rounded-lg px-5 py-2.5 font-semibold text-zinc-300 transition-colors duration-300 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmarAlteracao}
+                                disabled={salvando}
+                                className={`cursor-pointer rounded-lg px-5 py-2.5 font-semibold text-white transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                    tarefaSelecionada.tarefa_concluida
+                                        ? 'bg-violet-600 hover:bg-violet-500'
+                                        : 'bg-emerald-600 hover:bg-emerald-500'
+                                }`}
+                            >
+                                {salvando
+                                    ? 'Salvando...'
+                                    : tarefaSelecionada.tarefa_concluida
+                                        ? 'Marcar como pendente'
+                                        : 'Concluir'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     )
 }
