@@ -96,7 +96,7 @@ export default function TodoMain() {
                     <div className="flex justify-center">
                         <button
                             onClick={() => setFormularioVisivel(true)}
-                            className="cursor-pointer rounded-full bg-violet-600 px-8 py-3 font-semibold text-white shadow-lg shadow-violet-900/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-violet-500 active:translate-y-0"
+                            className="cursor-pointer bg-violet-600 px-8 py-3 font-semibold text-white shadow-lg shadow-violet-900/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-violet-500 active:translate-y-0"
                         >
                             Nova tarefa +
                         </button>
@@ -107,7 +107,7 @@ export default function TodoMain() {
                 {formularioVisivel && (
                     <form
                         onSubmit={cadastroTarefa}
-                        className="relative flex flex-col gap-4 rounded-2xl border border-violet-900/60 bg-zinc-900 p-6 shadow-2xl shadow-violet-950/50 md:p-8"
+                        className="relative flex flex-col gap-4  border border-violet-900/60 bg-zinc-900 p-6 shadow-2xl shadow-violet-950/50 md:p-8"
                     >
                         <div className="flex items-center justify-between">
                             <h2 className="font-serif text-2xl font-bold">Nova tarefa</h2>
@@ -153,17 +153,17 @@ export default function TodoMain() {
                     {carregando ? (
                         <p className="text-center text-zinc-400 animate-pulse">Carregando...</p>
                     ) : tarefas.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-700 p-12 text-center text-zinc-500">
+                        <div className="border border-dashed border-zinc-700 p-12 text-center text-zinc-500">
                             Não há nada aqui ainda.
                         </div>
                     ) : (
                         tarefas.map((tarefa) => (
                             <article
                                 key={tarefa.id}
-                                className="group rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 hover:border-violet-700 hover:shadow-lg hover:shadow-violet-950/40"
+                                className="group border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 hover:border-violet-700 hover:shadow-lg hover:shadow-violet-950/40"
                             >
                                 <div className="flex items-start justify-between gap-4">
-                                    <h3 className="font-serif text-2xl font-bold text-white">
+                                    <h3 className=" text-2xl font-bold text-white">
                                         {tarefa.titulo}
                                     </h3>
 
@@ -178,17 +178,7 @@ export default function TodoMain() {
                                             {tarefa.tarefa_concluida ? 'Concluída' : 'Pendente'}
                                         </span>
 
-                                        <button
-                                            type="button"
-                                            onClick={() => abrirConfirmacao(tarefa)}
-                                            aria-label={tarefa.tarefa_concluida ? 'Marcar como pendente' : 'Marcar como concluída'}
-                                            title={tarefa.tarefa_concluida ? 'Marcar como pendente' : 'Marcar como concluída'}
-                                            className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 hover:bg-emerald-500/10 hover:text-emerald-400 ${
-                                                tarefa.tarefa_concluida ? 'text-emerald-400' : 'text-zinc-500'
-                                            }`}
-                                        >
-                                            <Check size={20} />
-                                        </button>
+                                
                                     </div>
                                 </div>
 
