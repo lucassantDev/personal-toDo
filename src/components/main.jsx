@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Check } from 'lucide-react';
 import { supabase } from "../lib/supabase.js";
+import HeaderTodo from "./headerToDo.jsx";
 
 export default function TodoMain() {
     const [titulo, setTitulo] = useState('')
@@ -79,17 +80,7 @@ export default function TodoMain() {
             <div className="mx-auto max-w-3xl flex flex-col gap-10">
 
                 {/* Cabeçalho */}
-                <header className="flex flex-col items-center gap-2 text-center">
-                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-violet-400">
-                        Minhas tarefas
-                    </span>
-                    <h1 className="font-serif text-5xl font-bold">
-                        Olá, <span className="text-violet-400">User!</span>
-                    </h1>
-                    <p className="text-zinc-400">
-                        {tarefas.length} {tarefas.length === 1 ? 'tarefa cadastrada' : 'tarefas cadastradas'}
-                    </p>
-                </header>
+                <HeaderTodo tarefas={tarefas} />
 
                 {/* Botão nova tarefa */}
                 {!formularioVisivel && (
@@ -149,6 +140,7 @@ export default function TodoMain() {
                 )}
 
                 {/* Lista */}
+                <div className="max-h-[60vh] overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:var(--color-violet-700)_transparent]">
                 <div className="flex flex-col gap-4">
                     {carregando ? (
                         <p className="text-center text-zinc-400 animate-pulse">Carregando...</p>
@@ -184,12 +176,13 @@ export default function TodoMain() {
 
                                 <p className="mt-2 text-zinc-300">{tarefa.descricao}</p>
 
-                                <small className="mt-4 block text-xs text-zinc-500">
+                                <small className="mt-4 block font-sans font-bold text-sm text-zinc-500">
                                     {new Date(tarefa.data_criacao).toLocaleString('pt-BR')}
                                 </small>
                             </article>
                         ))
                     )}
+                </div>
                 </div>
             </div>
 
